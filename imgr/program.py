@@ -87,18 +87,15 @@ def run(*arguments: List[str]) -> None:
     found_computed = [array(col) for col in computed.keys()]
 
     try:
-        cont = 0
         for idx, pixel in enumerate(tqdm(pixels)):
-            if cont - 1 == _im_new.size[0]:
+            if idx - 1 == _im_new.size[0]:
                 im_pos[0] = 0
                 im_pos[1] *= OUT_SIZE
                 cont = 0
 
             pix = RGB(*pixel)
 
-            _im_new.paste(
-                computed[nearest_color(pix, found_computed)], box=(*im_pos,)
-            )
+            _im_new.paste(computed[nearest_color(pix, found_computed)], box=(*im_pos,))
 
             im_pos[0] += OUT_SIZE
             cont += 3
