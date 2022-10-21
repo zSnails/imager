@@ -67,8 +67,8 @@ def run(*arguments: List[str]) -> None:
     print("debug: creating new image")
 
     dimensions = (
-        im_orig.size[0] * 3,
-        im_orig.size[1] * 3,
+        im_orig.size[0] * OUT_SIZE,
+        im_orig.size[1] * OUT_SIZE,
     )
 
     _im_new = im_new(mode="RGB", size=dimensions)
