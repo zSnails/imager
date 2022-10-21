@@ -91,14 +91,12 @@ def run(*arguments: List[str]) -> None:
             if idx - 1 == _im_new.size[0]:
                 im_pos[0] = 0
                 im_pos[1] *= OUT_SIZE
-                cont = 0
 
             pix = RGB(*pixel)
 
             _im_new.paste(computed[nearest_color(pix, found_computed)], box=(*im_pos,))
 
             im_pos[0] += OUT_SIZE
-            cont += 3
 
     finally:
         print("debug: freeing resources")
