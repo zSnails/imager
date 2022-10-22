@@ -74,35 +74,35 @@ def im_free(computed: Dict[RGB, List[RGB]]) -> None:
 
 
 # NOTE: no need to specify image width or height
-OUT_SIZE = 50
+OUT_SIZE = 10
 
 
-def generate_image_block(
-    id: int,
-    pixels: List[Tuple[int, int, int]],
-    colors: List[RGB],
-    images: Dict[RGB, Image],
-    dimensions: Tuple[int, int],
-    out: Connection,
-):
-    im_pos = [0, 0]
-    _im_new = im_new("RGB", dimensions)
-    print(f"debug: generating image: {id}")
-    for idx, pixel in enumerate(tqdm(pixels)):
-        if (idx + 1) % dimensions[0] == 0:
-            im_pos[0] = 0
-            im_pos[1] += OUT_SIZE
+# def generate_image_block(
+#     id: int,
+#     pixels: List[Tuple[int, int, int]],
+#     colors: List[RGB],
+#     images: Dict[RGB, Image],
+#     dimensions: Tuple[int, int],
+#     out: Connection,
+# ):
+#     im_pos = [0, 0]
+#     _im_new = im_new("RGB", dimensions)
+#     print(f"debug: generating image: {id}")
+#     for idx, pixel in enumerate(tqdm(pixels)):
+#         if (idx + 1) % dimensions[0] == 0:
+#             im_pos[0] = 0
+#             im_pos[1] += OUT_SIZE
 
-        pix = RGB(*pixel)
+#         pix = RGB(*pixel)
 
-        _im_new.paste(images[nearest_color(pix, colors)], box=(*im_pos,))
+#         _im_new.paste(images[nearest_color(pix, colors)], box=(*im_pos,))
 
-        im_pos[0] += OUT_SIZE
+#         im_pos[0] += OUT_SIZE
 
-    print("debug: sending data")
-    out.send((id, list(_im_new.getdata())))
-    _im_new.close()
-    print("debug: sent data")
+#     print("debug: sending data")
+#     out.send((id, list(_im_new.getdata())))
+#     _im_new.close()
+#     print("debug: sent data")
 
 
 def run(*arguments: List[str]) -> None:
@@ -165,8 +165,6 @@ def run(*arguments: List[str]) -> None:
     for process in pool:
         process.join()
 
-    # _compute_images(args.img_dir, found_cols, computed)
-
     pixels = im_orig.getdata()
 
     found_computed = [array(col) for col in computed.keys()]
@@ -177,52 +175,68 @@ def run(*arguments: List[str]) -> None:
         im_orig.size[1] * OUT_SIZE,
     )
 
+    _im_new = im_new("RGB", dimensions)
     try:
+        im_pos = [0, 0]
+        print(f"debug: generating image: {id}")
+        for idx, pixel in enumerate(tqdm(pixels)):
+            if (idx + 1) % im_orig.size[0] == 0:
+                im_pos[0] = 0
+                im_pos[1] += OUT_SIZE
 
-        out, img_data = Pipe()
-        IM_CHUNKS = args.num_processess
+            pix = RGB(*pixel)
 
-        CHUNK_HEIGHT = dimensions[1] // IM_CHUNKS
+            _im_new.paste(computed[nearest_color(pix, found_computed)], box=(*im_pos,))
 
-        print("debug: created new image")
+            im_pos[0] += OUT_SIZE
+        
+        # out, img_data = Pipe()
+        # IM_CHUNKS = args.num_processess
 
-        pixel_chunk = chunk(list(pixels), IM_CHUNKS)
-        gen_pool = []
-        for id in range(IM_CHUNKS):
-            p = Process(
-                target=generate_image_block,
-                args=(
-                    id,
-                    next(pixel_chunk),
-                    found_computed,
-                    computed,
-                    (dimensions[0], CHUNK_HEIGHT),
-                    out,
-                ),
-            )
-            p.start()
-            gen_pool.append(p)
+        # CHUNK_HEIGHT = dimensions[1] // IM_CHUNKS
 
-        final_image_data = {}
-        for _ in range(IM_CHUNKS):
-            print("debug: waiting for chunk data")
-            id, data = img_data.recv()
-            print("debug: received chunk data")
-            final_image_data[id] = data
+        # print("debug: created new image")
 
-        img_data.close()
+        # pixel_chunk = chunk(list(pixels), IM_CHUNKS)
+        # gen_pool = []
+        # for id in range(IM_CHUNKS):
+        #     p = Process(
+        #         target=generate_image_block,
+        #         args=(
+        #             id,
+        #             next(pixel_chunk),
+        #             found_computed,
+        #             computed,
+        #             (dimensions[0], CHUNK_HEIGHT),
+        #             out,
+        #         ),
+        #     )
+        #     p.start()
+        #     gen_pool.append(p)
 
-        _out_arr = []
-        for id in range(IM_CHUNKS):
-            _out_arr.append(final_image_data[id])
+        # final_image_data = {}
+        # for _ in range(IM_CHUNKS):
+        #     print("debug: waiting for chunk data")
+        #     id, data = img_data.recv()
+        #     print("debug: received chunk data")
+        #     final_image_data[id] = data
 
-        out = Image.new_from_array(_out_arr, interpretation="auto")
-        out.write_to_file(str(datetime.now()) + ".jpg")
+        # img_data.close()
 
-        for proc in gen_pool:
-            proc.join()
+        # _out_arr = []
+        # for id in range(IM_CHUNKS):
+        #     _out_arr.append(final_image_data[id])
+
+        # out = Image.new_from_array(_out_arr, interpretation="auto")
+        # out.write_to_file(str(datetime.now()) + ".jpg")
+
+        # for proc in gen_pool:
+        #     proc.join()
     finally:
         print("debug: freeing resources")
+        _im_new.save(str(datetime.now()) + ".jpg", format="JPEG")
+        _im_new.close()
+
         im_orig.close()
         im_free(computed)
 
