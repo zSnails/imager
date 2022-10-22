@@ -74,7 +74,7 @@ def im_free(computed: Dict[RGB, List[RGB]]) -> None:
 
 
 # NOTE: no need to specify image width or height
-OUT_SIZE = 10 
+OUT_SIZE = 10
 
 
 # def generate_image_block(
