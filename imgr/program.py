@@ -2,7 +2,6 @@ from argparse import ArgumentParser, Namespace
 from typing import List, Dict, Tuple
 from numpy import array
 from PIL.Image import open as im_open, new as im_new, Image
-from pyvips import Image
 
 from datetime import datetime
 from multiprocessing import Process, Pipe
