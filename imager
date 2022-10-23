@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
 from imgr.__main__ import run
-from sys import argv
+from time import perf_counter
 
-run(argv)
+if __name__ == '__main__':
+    start = perf_counter()
+    run()
+
+    print("Duración:", perf_counter() - start)

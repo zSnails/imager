@@ -10,7 +10,6 @@ from multiprocessing.connection import Connection
 # from PIL import Image
 from os import listdir
 from os.path import join
-from random import choice
 from .rgb import RGB
 
 
@@ -30,7 +29,7 @@ def chunk(_list: list, size: int):
         yield _list[i : i + size]
 
 
-def _parse_args(*arguments: List[str]) -> Namespace:
+def _parse_args() -> Namespace:
     """
     Helper function to parse arguments, the only purpose for this function
     is so the run function doesn't look too polluted
@@ -104,7 +103,7 @@ OUT_SIZE = 10
 #     print("debug: sent data")
 
 
-def run(*arguments: List[str]) -> None:
+def run() -> None:
     """
     Runs the main process for the program
 
@@ -118,7 +117,7 @@ def run(*arguments: List[str]) -> None:
         None
     """
 
-    args = _parse_args(arguments)
+    args = _parse_args()
 
     print("debug: opening image")
     im_orig = im_open(args.image, "r", formats=("JPEG", "PNG"))
@@ -137,7 +136,7 @@ def run(*arguments: List[str]) -> None:
     IMAGE_CHUNK_SZ = len(files) // args.num_processess
 
     image_chunks = chunk(files, IMAGE_CHUNK_SZ)
-    color_chunks = chunk(found_cols, IMAGE_CHUNK_SZ)
+    color_chunks = chunk(found_cols, COLOR_CHUNK_SZ)
 
     pool = []
 
@@ -233,7 +232,7 @@ def run(*arguments: List[str]) -> None:
         #     proc.join()
     finally:
         print("debug: freeing resources")
-        _im_new.save(str(datetime.now()) + ".jpg", format="JPEG")
+        _im_new.save(str(datetime.now().date()) + ".jpg", format="JPEG")
         _im_new.close()
 
         im_orig.close()
