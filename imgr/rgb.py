@@ -8,7 +8,7 @@ class RGB:
     R: int
     G: int
     B: int
-    A: Optional[int] = None
+    A: Optional[int] = 255
 
     def increment(self, r, g, b, a=None):
         self.R += r
@@ -25,4 +25,4 @@ class RGB:
         return array([self.R, self.G, self.B])
 
     def __hash__(self):
-        return hash((((self.R << 8) | self.G) << 8) | self.B)
+        return hash(self.R + self.G + self.B)
