@@ -20,3 +20,8 @@ Para correrlo con un solo núcleo utilizar el siguiente comando
 ```bash
 python imager --num-processess 1 <imagen>
 ```
+
+# NOTA
+
+Para correr el programa se requiere una carpeta llamada images, en la cual se deben almacenar
+las imagenes que se usan para construir el collage
